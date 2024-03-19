@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DGF - Docs - Samples</title>
+        <style>
+			.codeholder{
+				border: 1px solid black; 
+				border-radius: 5px;
+				overflow-x: scroll;
+				overflow-y: scroll;
+				text-align:left;
+                width: fit-content;
+                block-size: fit-content;
+                padding-right: 16pt;  
+			}
+		</style>
+    </head>
+    <body>
+        <h1>The DGF Docs</h1>
+        <p>This page only provides basic samples. For more in depth explainations please click <a href="deep.html">here</a></p>
+
+        <h2>Creating a player</h2>
+        Using the code below you can create a player GameObject that can move left and right.
+        <pre class="codeholder">
+// Create a class for the player
+class player extends GameObject {
+    MoveLeft(){ // Handle moving to the left
+        if(this.Position.locX != 10){  // Stop us from moving too far to the left
+            this.Position.locX -= 10;
+        }
+    }
+    MoveRight(){ // Handle moving to the right
+        if(this.Position.locX != 940){ // Stop us from moving too far to the right
+            this.Position.locX += 10;
+        }
+    }
+}
+
+// Main loop
+function GameLogic(){
+    EngineLoop();
+}
+
+// Add the object to the stack
+CreateObject("Player", new player(50, 540, 50, 50, "#FFFFFF", false));
+// Select a canvas
+selectCan("GameWindow", "#000000");
+// Start the engine
+var interval = setInterval(GameLogic, 10);
+        </pre>
+        <p>To add the ability for the player to use its movement functions you would add the below code below the creation of the player object.</p>
+        <pre class="codeholder">
+addInputBind("KeyA", "MoveLeft", "GameObjects['Player']");
+addInputBind("KeyD", "MoveRight", "GameObjects['Player']");
+</pre>
+    </body>
+</html>

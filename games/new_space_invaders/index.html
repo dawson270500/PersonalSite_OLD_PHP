@@ -1,0 +1,236 @@
+<html>
+    <head>
+        <title>Space Invaders</title>
+        <script src="game.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Latest compiled and minified CSS -->
+        <link rel="icon" type="image/x-icon" href="../../img/favicon.ico">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <link rel="stylesheet" href="../../css/main.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="jumbotron">
+                <div class="row">
+                    <div class="col-sm-8">
+                    <h1>Bailey-Tyreese Dawson</h1>
+                    </div>
+                    <div class="col-sm-4" style=" position: absolute; right: 0px;">
+                    <img class="mobileHide" src="../../img/propic.jpg" alt="My Profile Picture" style="border-radius: 50%;">
+                    </div>
+                </div>
+				<br>
+				<p>This is the rewrite of my old space invaders game I have been working on for a while. Written using my own JS game framework (DGF).
+                    This page will work on mobile but you will not be able to control the game currently<br>Use the button below to download the framework and its 
+                    readme file.
+                </p>
+                <div class="button" style="height:1.7em;width:25%;"><a href="./DGF.zip" download>Download the framework</a></div>
+            </div>
+        </div>
+        <div class="container">
+            <div style="text-align: center;">
+                <p>A to move left, D to move right, space to shoot, P to pause/unpause. The game starts paused.</p>
+                <canvas id="GameWindow" width="1000" height="600"></canvas>
+                <div style="display:none" id="imageHold">
+                    <img src="https://www.pngall.com/wp-content/uploads/13/Space-Invaders-PNG-Images-HD.png" id="player">
+                    <img src="https://www.pngall.com/wp-content/uploads/13/Space-Invaders-PNG-Photos.png" id="invader">
+                </div>
+            </div>
+        </div>
+        <br>
+        <footer>
+            <div class="container">
+                <div class="jumbotron">
+                    <a class="footer" href="https://www.linkedin.com/in/bailey-tyreese-dawson-50a67b195/">LinkedIn</a><br>
+                    <a class="footer" href = "mailto:baileydawson@baileydawson.uk">Email: baileydawson@baileydawson.uk</a><br>
+                    <a class="footer" href="https://github.com/dawson270500">GitHub</a>
+                </div> 
+            </div> 
+    </footer>
+    </body>
+</html>
+<script>
+    // Class setup
+    var bulletCount = 0;
+    class player extends GameObject {
+        Updater = true;
+        image = document.getElementById("player");
+        MoveLeft(){
+            if(this.Position.locX != 10){
+                this.Position.locX -= 10;
+            }
+        }
+        MoveRight(){
+            if(this.Position.locX != 940){
+                this.Position.locX += 10;
+            }
+        }
+        Shoot(){
+            if(bulletCount != 50){
+                var postfix = Math.floor(Math.random() * 999);
+                CreateObject("BULLET"+postfix, new bullet(this.Position.locX+20, this.Position.locY-10, 30, 10, "#09ff00", true));
+                bulletCount++;
+            }
+        }
+        
+        OnUpdate(){
+            for(const [key, value] of Object.entries(GameObjects)){
+                if(key.startsWith("BULLET")){
+                    if(value.existed == 150) {
+                        DeleteObject(value.name);
+                        bulletCount--;
+                    }
+                }
+            }
+        }
+    }
+    class bullet extends GameObject {
+        Updater = true;
+        existed = 0;
+        delOnColide = true;
+
+        OnUpdate(){
+            this.Position.locY -= 5;
+            this.existed++;
+        }
+        OnColide(obj){
+            if(obj.name.startsWith("Invader")){
+                DeleteObject(obj.name);
+                score += 10;
+            }
+        }
+    }
+    class invader extends GameObject {
+        image = document.getElementById("invader");
+        Updater = true;
+        direction = 1;
+        endInv = false;
+
+        OnUpdate(){
+            this.Position.locX += this.direction;
+        }
+    }
+
+    // Game Logic
+    var firstFrame = true;
+    function GameLogic(){
+        EngineLoop();
+        if (firstFrame == true){
+            Pause();
+            firstFrame = false;
+            return;
+        }
+        engineUpdate();
+    }
+
+    // Game setup
+    selectCan("GameWindow", "#000000");
+    var score = 0;
+    function Start(){
+        // If the game has already been played.
+        if(typeof GameObject["Player"] !== 'undefined'){
+            removeInputBind("Enter");
+            DeleteObject("Player");
+            DeleteTextObj("WinText");
+            DeleteTextObj("WinText_Direction");
+            DeleteTextObj("ScoreText");
+            DeleteTextObj("LoseText");
+            DeleteTextObj("LoseText_Direction");
+            winState = false;
+            winDir = 1;
+            bulletCount = 0;
+        }
+
+        var startX = 50;
+        for (let i = 1; i < 12; i++) {
+            CreateObject("Invader"+i, new invader(startX*i, 100, 50, 50, "#FFFFFF", true));
+        }
+        CreateObject("Player", new player(50, 540, 50, 50, "#FFFFFF", false));
+        addInputBind("KeyA", "MoveLeft", "GameObjects['Player']");
+        addInputBind("KeyD", "MoveRight", "GameObjects['Player']");
+        addInputBind("Space", "Shoot", "GameObjects['Player']");
+        addInputBind("KeyP", "Pause", "");
+        createTextObj("ScoreText", new TextObject(10, 30, "#FFFFFF", "Score: 0", "32px serif"));
+        
+    }   
+
+    var pauseState = false;
+    function Pause(){
+        if(pauseState == false) {
+            removeInputBind("KeyA");
+            removeInputBind("KeyD");
+            removeInputBind("Space");
+            clearInterval(interval);
+            pauseState = true;
+        }
+        else{
+            addInputBind("KeyA", "MoveLeft", "GameObjects['Player']");
+            addInputBind("KeyD", "MoveRight", "GameObjects['Player']");
+            addInputBind("Space", "Shoot", "GameObjects['Player']");
+            interval = setInterval(GameLogic, 10);
+            pauseState = false;
+        }
+    }
+
+    var winState = false;
+    var loseState = false;
+    var winDir = 1;
+    function engineUpdate(){
+        var moveInvade = false; 
+        var numInvade = 0;
+        TextObjects["ScoreText"].text = "Score: "+score;
+        for(const [key, value] of Object.entries(GameObjects)){
+            if(key.startsWith("Invader")){
+                numInvade++;
+                if(value.Position.locX == 940 || value.Position.locX == 10){
+                    moveInvade = true;
+                    break;
+                }
+            }
+        }
+        if(numInvade == 0 && !winState){
+            createTextObj("WinText", new TextObject(100, 300, "#09ff00", "YOU WIN", "48px serif"));
+            createTextObj("WinText_Direction", new TextObject(100, 400, "#09ff00", "Press enter to restart", "48px serif"));
+            winState = true;
+            removeInputBind("KeyA");
+            removeInputBind("KeyD");
+            removeInputBind("Space");
+            addInputBind("Enter", "Start", "");
+        }
+        if(winState){
+            TextObjects["WinText"].Position.locX += winDir;
+            if(TextObjects["WinText"].Position.locX == 10 || TextObjects["WinText"].Position.locX == 790){
+                winDir = -winDir;
+            }
+        }
+        for(const [key, value] of Object.entries(GameObjects)){
+            if(key.startsWith("Invader") && moveInvade){
+                value.Position.locY +=50;
+                if(value.Position.locY == 550){
+                    loseState = true;
+                    createTextObj("LoseText", new TextObject(100, 300, "#09ff00", "YOU LOSE", "48px serif"));
+                    createTextObj("LoseText_Direction", new TextObject(100, 400, "#09ff00", "Press enter to restart", "48px serif"));
+                    winState = true;
+                    removeInputBind("KeyA");
+                    removeInputBind("KeyD");
+                    removeInputBind("Space");
+                    addInputBind("Enter", "Start", "");
+                    break;
+                }
+                value.direction = -value.direction;
+            }
+        }
+        if(loseState){
+            TextObjects["LoseText"].Position.locX += winDir;
+            if(TextObjects["LoseText"].Position.locX == 10 || TextObjects["LoseText"].Position.locX == 790){
+                winDir = -winDir;
+            }
+        }
+    }
+   
+    Start();
+    var interval = setInterval(GameLogic, 10);
+</script>

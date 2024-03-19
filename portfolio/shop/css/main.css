@@ -1,0 +1,55 @@
+a:link {
+    text-decoration: none;
+    color: black;
+}
+a:visited {
+    text-decoration: none;
+    color: black;
+}
+.footer:hover{
+    text-decoration: none;
+    color: grey;
+}
+a:active {
+    text-decoration: none;
+    color: black;
+}
+
+ul.navbar {
+    list-style-type: none;
+    padding: 0%;
+    overflow: hidden;
+    background-color: #eee;
+    width: 100%;
+}
+li.navbar {
+    float: left;
+    padding: 1em 2em 1em 2em;
+}
+li.navbar a.navbar {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+}
+li.navbar:hover{
+    background-color: darkgrey;
+} 
+a.navbar:hover{
+    color: black;
+    background-color: darkgrey;
+}
+.active {
+    background-color: #dfdfdf;
+}
+.header{
+    background-color: #eee;
+}
+
+@media screen and (max-width: 768px) {
+    ul.navbar li.navbar{
+        float: none;
+    }
+    .mobileHide{
+        display: none;
+    }
+}

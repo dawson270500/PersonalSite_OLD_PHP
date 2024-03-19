@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>DGF - Docs - Deep dive</title>
+        <style>
+			.codeholder{
+				border: 1px solid black; 
+				border-radius: 5px;
+				text-align:left;
+                width: fit-content;
+                block-size: fit-content;
+                padding-right: 16pt;    
+                padding-left: 8pt;     
+			}
+		</style>
+    </head>
+    <body>
+<h1>The DGF Docs</h1>
+<p>This page provides in depth explainations. For samples please click <a href="index.html">here</a></p>
+
+<h2>The GameObject Queue</h2>
+<p>GameObjects are held in a dictionary but the game engine treats this as a Queue when its rending and checking collisions.<br>
+    When the engine is rendering or checking collisions, it reads the stack as a set of tuples (key and val) but ignores the key.<br>
+    The last object added will be rendered and checked for collisions last, meaing you can use this to control the Z allignment of an object.
+</p>
+<p>Add a game object into the stack like below</p>
+<pre class="codeholder">CreateObject("Obj1", new GameObject(50, 540, 50, 50, "#FFFFFF", false));</pre>
+<p>The format for this call is as follows 
+    <pre class="codeholder">CreateObject({name: string}, {GameObject: Object});</pre><br>
+The format for the gameobject creation is as follows 
+<pre class="codeholder">new GameObject({X: int}, {Y: int}, {Height: int}, {Width: int}, {Hex color code: string}, {Collision enabled: bool});</pre></p>
+<p>This adds the GameObject into the dictionary. You can access the object like below. This would move the object 10 pixels to the right.</p>
+<pre class="codeholder">GameObjects["Obj1"].Position.locX += 10;</pre>
+<h2>Input binding</h2>
+<p>Input bindings on the keyboard can be created and deleted on the fly.<br>They are held in a dictionary with the keycode been the key and the value 
+    been a tuple holding which object to work on and what function to call on that object.<br>If the object field is left empty then the engine will call
+        the function as normal. Below is an example of both.
+</p>
+<pre class="codeholder">
+// Add a keybind that calls a function from an object
+addInputBind("KeyQ", "QPressed", "GameObjects['Obj1']");
+// Add a keybind that just calls a function
+addInputBind("KeyW", "WPressed", "");
+</pre>
+<p>The format for this is as follows 
+<pre class="codeholder">
+addInputBind({Key code: stirng}, {Function name: string}, {Object selector: string});
+</pre>
+To delete a binding use the code below
+<pre class="codeholder">
+removeInputBind("KeyQ");
+</pre>
+The format for this is as follows 
+<pre class="codeholder">
+removeInputBind({Key code: string});
+</pre></p>
+<h2>Updaters</h2>
+<p>Updaters are objects that receive a call from the engine on a function every tick. You can create one using the below code.</p>
+<pre class="codeholder">
+class GameClass extends GameObject {
+    Updater = true;
+
+    OnUpdate(){
+        this.Position.locX += 10;
+    }
+}
+</pre>
+<p>The code above would move the object 10 pixels right every tick. The function and the variable need to be set for this to function.</p>
+<h2>Objects that render images</h2>
+<p>The engine can render images, but the object must be set up to do this. See below code that can do this</p>
+<pre class="codeholder">
+&lt;!--HTML is required for this to work--&gt;
+&lt;img src="exmaple.jpg" id="image"&gt;
+&lt;script&gt;
+class GameClass extends GameObject {
+    image = document.getElementById("image");
+}
+&lt;/script&gt;
+</pre>
+<p>The image must be already loaded when it tries to render it, otherwise it will render nothing. The image can be made invisible using CSS.</p>
+</body>
+</html>
